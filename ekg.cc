@@ -10,6 +10,9 @@
 DEFINE_string(output_image, "/tmp/output_image.jpg", "Output Image Path, optional");
 DEFINE_string(input_jpg, "", "Input Image Path, required");
 DEFINE_string(output_csv, "", "Output inference csv, optional, defaults to stdout.");
+DEFINE_double(smoothness, 1, "Smoothness.");
+DEFINE_double(brightness, 1, "Brightness.");
+
 
 using namespace cv;
 using namespace std;
@@ -17,7 +20,7 @@ using namespace std;
 struct NeighborFunctor {
    template <typename T>
    bool operator()(const T* const x, const T* const y, const T* const z, T* residual) const {
-     residual[0] = T(0.1) * ((y[0] - x[0]) - (z[0] - y[0]));
+     residual[0] = T(FLAGS_smoothness) * ((y[0] - x[0]) - (z[0] - y[0]));
      return true;
    }
 };
@@ -59,7 +62,7 @@ int main( int argc, char** argv )
     	for (int col = 0; col  < image.cols; ++col) {
     		auto pix = image.at<cv::Vec3b>(row, col);
     		int sum = pix[0] + pix[1] + pix[2];
-    		if (sum < 450) {
+    		if (sum < FLAGS_brightness) {
     			blacks[col].insert(row);
     		}
     	}
